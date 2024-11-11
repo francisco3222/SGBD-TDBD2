@@ -14,17 +14,76 @@ elseif (is_page('gestao-de-registos')) {
 else {
 	echo "Esta não é a página de registos";
 }
-
 // Exibe o conteúdo principal da página de gestão de registos
 function exibir_conteudo_gestao_de_registos(): void {
 	// Se o parâmetro estado estiver presente na URL, o valor de $_GET['estado'] será sanitize (para evitar a injeção de código malicioso) e atribuído à variável $estado.
-	$estado = isset($_GET['estado']) ? sanitize_text_field($_GET['estado']) : '';
-	if (empty($estado)) {
-		tabela_de_registos(); // Chama a função para exibir os registos
-	} else {
-		echo "Outro estado"; // Caso um estado específico seja passado na URL
+	$estado = isset($_POST['estado']) ? $_POST['estado'] : '';
+	if($estado === 'validar') {
+		validar_dados();
+	}
+	elseif ($estado ==='inserir'){
+		echo 'Inserindo...';
+	}
+	else{
+	tabela_de_registos(); // Chama a função para exibir os registos
+	formulario();
 	}
 }
+
+function formulario(): void {
+	echo "<h3>Dados de Registo - Introdução</h3>";
+	echo"<p>Introduza os dados pessoais básicos da criança: </p>";
+
+	echo "<form action='' method='POST'>";
+//Campo para o Nome Completo da Criança
+	echo "<label for='nome'>Nome completo:</label><br>";
+	echo "<input type='text' name='nome' id='nome' placeholder='(obrigatório)' 
+			required pattern='[A-Za-zÀ-ÖØ-öø-ÿ\\s]+'
+			title='Por favor, introduza apenas letras e espaços.'><br>";
+// Campo para a Data de Nascimento da Criança
+	echo "<label for='data_nascimento'>Data de nascimento:</label><br>";
+	echo "<input type='text' placeholder='(obrigatório)' id='data_nascimento' name='data_nascimento' 
+			required pattern='\\d{4}-\\d{2}-\\d{2}' 
+			title='Por favor, introduza a data no seguinte formato: AAAA-MM-DD.'><br>";
+
+// Campo para o Nome do Encarregado de Educação
+	echo "<label for='encarregado_de_educacao'>Nome completo do encarregado de educação:</label><br>";
+	echo "<input type='text' placeholder='(obrigatório)' id='encarregado' name='encarregado_de_educacao' 
+			required pattern='[A-Za-zÀ-ÖØ-öø-ÿ\\s]+' 
+       		title='Por favor, introduza apenas Letras e Espaços.'><br>";
+
+// Campo para o Telefone do Encarregado de Educação - apenas 9 dígitos
+	echo "<label for='telefone'>Telefone do encarregado de educação:</label><br>";
+	echo "<input type='text' placeholder='(obrigatório)' id='telefone' name='telefone' 
+			required pattern='\\d{9}' 
+       		title='Por favor, introduza um número com exatamente 9 dígitos.'><br>";
+
+// Campo para o Endereço de E-mail do Tutor (opcional)
+	echo "<label for='email'>Endereço de E-mail do tutor:</label><br>";
+	echo "<input type='email' id='email' placeholder='(opcional)' name='email' 
+			pattern='[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' 
+     	 	title='Por favor, introduza um endereço de e-mail válido.'><br><br>";
+
+// Campo oculto "estado" para o valor do estado seguinte
+	echo "<input type='hidden' name='estado' value='validar'> ";
+
+// Botão para Submeter o formulário
+	echo "<input type='submit' value='Submeter'>";
+	echo "</form>";
+}
+
+function validar_dados():void {
+	// Recupera os dados enviados pelo formulário anterior e armazena nas variáveis correspondentes
+	$nome = $_POST['nome'];
+	$data_nascimento = $_POST['data_nascimento'];
+	$encarregado = $_POST['encarregado_de_educacao'];
+	$telefone = $_POST['telefone'];
+	$email = $_POST['email'] ?? '';
+
+	echo "<h3>Dados de registo - Validação</h3>";
+}
+
+
 
 // Função que gera a tabela de registos de crianças
 function tabela_de_registos(): void {
@@ -112,8 +171,8 @@ function tabela_de_registos(): void {
                         }
 
                         // Exibe o registo com a data, hora e o utilizador, juntamente com links para editar e apagar
-                        $registos_resultado .= "[<a href=\"editar.php?id={$child_id}\">editar</a>] 
-                                     [<a href=\"apagar.php?id={$child_id}\">apagar</a>] - 
+                        $registos_resultado .= "[<a href='editar.php?id={$child_id}'>editar</a>] 
+                                     [<a href='apagar.php?id={$child_id}'>apagar</a>] - 
                                      <b><strong>{$registo['Data']}</b> {$registo['Horas']}</strong> 
                                      ({$registo['User']}) - ";
 
